@@ -1,13 +1,13 @@
-package com.Wetherapplication;
+package io.securepath.authsphere;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class WetherApplication {
+public class AuthSphareWeb {
 
 	public static void main(String[] args) {
-		SpringApplication.run(WetherApplication.class, args);
+		SpringApplication.run(AuthSphareWeb.class, args);
 	}
 
 }

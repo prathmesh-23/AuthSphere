@@ -1,4 +1,4 @@
-package com.Wetherapplication;
+package io.securepath.authsphere;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
