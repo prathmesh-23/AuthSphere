@@ -19,8 +19,8 @@ public class Users {
     @Column(name = "userid")
     private Long userid;
 
-    @Column(name = "name", nullable = false, length = 100)
-    private String name;
+    @Column(name = "username", nullable = false, length = 100)
+    private String userName;
 
     @Column(name = "email_enc", nullable = false, unique = true, length = 100)
     private String emailEnc;
@@ -34,6 +34,7 @@ public class Users {
     @Column(name = "isdeleted", nullable = false)
     private int isdeleted;
 
-
+    @Column(name = "hash_key", nullable = false)
+    private String hash_key;
 
 }

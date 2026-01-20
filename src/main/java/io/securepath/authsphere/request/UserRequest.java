@@ -11,4 +11,6 @@ public class UserRequest {
     private long userId;
     private String email;
     private String userName;
+    private String password;
+
 }

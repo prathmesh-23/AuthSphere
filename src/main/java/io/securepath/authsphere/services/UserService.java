@@ -15,20 +15,41 @@ public class UserService {
     @Autowired
     private UserBo gUserBo;
 
-    public ApiResponse getUserDetails(UserRequest pUserReq) {
+    public ApiResponse getUsersList(UserRequest pUserReq) throws Exception {
         ApiResponse lResp = new ApiResponse();
-        try {
             List<Users> lUserList = null;
             lUserList = gUserBo.getUsersBo(pUserReq);
-            if (!(lUserList==null)){
+            if (!(lUserList == null)) {
                 lResp.setResponse(lUserList);
                 lResp.setStatus("Ok");
                 lResp.setStatusCode("200");
             }
-        } catch (Exception e) {
 
-        }
         return lResp;
+    }
+
+    public ApiResponse getUserDetails(UserRequest pUserReq) throws Exception {
+        ApiResponse lResp = new ApiResponse();
+            Users lUser = gUserBo.getUserBo(pUserReq);
+            if (lUser!=null){
+                lResp.setStatus("OK");
+                lResp.setStatusCode("200");
+                lResp.setResponse(lUser);
+            }else {
+                lResp.setStatus("USER NOT FOUND");
+                lResp.setStatusCode("200");
+                lResp.setResponse(null);
+            }
+
+        return lResp;
+    }
+
+    public ApiResponse createUser(UserRequest pUser) throws Exception {
+        return gUserBo.createUserBo(pUser);
+    }
+
+    public ApiResponse updateUser(UserRequest pUser) throws Exception {
+        return gUserBo.updateUserBo(pUser);
     }
 }
 
