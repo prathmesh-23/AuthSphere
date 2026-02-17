@@ -11,4 +11,5 @@ public class ApiResponse {
     private String status="";
     private String statusCode="";
     private Object response;
+    private String token="";
 }
