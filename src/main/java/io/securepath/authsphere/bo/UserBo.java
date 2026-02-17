@@ -34,7 +34,7 @@ public class UserBo {
     public ApiResponse createUserBo(UserRequest pUser) throws Exception {
         ApiResponse lResp = new ApiResponse();
         String lUserPassHashKey = AESEncryption.generateStrongKey();
-        long lResult = gUserDao.createUser(pUser.getUserName(), AESEncryption.encrypt(pUser.getPassword()), AESEncryption.hashPasswordWithKey(pUser.getPassword(), lUserPassHashKey), lUserPassHashKey, 1, 1);
+        long lResult = gUserDao.createUser(pUser.getUserName(), AESEncryption.encrypt(pUser.getEmail()), AESEncryption.hashPasswordWithKey(pUser.getPassword(), lUserPassHashKey), lUserPassHashKey, 1, 1);
         if (lResult == 1) {
             lResp.setResponse("USER CREATED");
         } else {
