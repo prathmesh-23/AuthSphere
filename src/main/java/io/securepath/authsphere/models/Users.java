@@ -37,4 +37,7 @@ public class Users {
     @Column(name = "hash_key", nullable = false)
     private String hash_key;
 
+    @Column(name = "otp", nullable = false)
+    private String otp;
+
 }

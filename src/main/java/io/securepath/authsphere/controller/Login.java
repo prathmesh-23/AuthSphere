@@ -16,6 +16,7 @@ public class Login {
 
     @Autowired
     private LoginService gLoginService;
+
     @PostMapping("/login")
     public ApiResponse login(@RequestBody UserRequest login) {
         ApiResponse lResponse = new ApiResponse();
@@ -23,6 +24,19 @@ public class Login {
             lResponse = gLoginService.loginProcess(login);
         } catch (Exception e) {
             System.out.println(e);
+        }
+        return lResponse;
+    }
+
+    @PostMapping("/otpvalidate")
+    public ApiResponse otpValidate(@RequestBody UserRequest pOtp) {
+        ApiResponse lResponse = new ApiResponse();
+
+        try {
+            lResponse = gLoginService.otpValidate(pOtp);
+        } catch (Exception e) {
+            System.out.println(e);
+
         }
         return lResponse;
     }

@@ -7,6 +7,7 @@ import io.securepath.authsphere.models.Users;
 
 import javax.crypto.SecretKey;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +20,8 @@ public class JwtUtility {
         return Jwts.builder()
                 .setClaims(claims)
                 .signWith(key, SignatureAlgorithm.HS256)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 15 * 60 * 1000))
                 .compact();
     }
 
@@ -60,7 +63,7 @@ public class JwtUtility {
         return jws.getBody();
     }
 
-    public static String setClaims(Map<String, Object> pClaims, Users pUser) {
+    public static String setClaims(Users pUser) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(JWTClaim.USERID, pUser.getUserid());
         claims.put(JWTClaim.SUBJECT, pUser.getUserName());
@@ -68,6 +71,8 @@ public class JwtUtility {
         claims.put(JWTClaim.ISSUER_SERVER, "AuthSphere");
         claims.put(JWTClaim.ROLE, "Roles");
         claims.put(JWTClaim.SESSION, "admin");
+        claims.put(JWTClaim.EXP_TIME, "admin");
+
 
         return createToken(claims);
     }
@@ -78,4 +83,8 @@ public class JwtUtility {
     public static  final  String EXP_TIME="exp";
     public  static  final String ROLE="role";
     public  static  final String SESSION="session";
+
+    public static String refreshToken(Users pUser) {
+        return setClaims(pUser);
+    }
 }

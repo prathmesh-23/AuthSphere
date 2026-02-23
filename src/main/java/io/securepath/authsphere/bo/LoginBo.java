@@ -27,4 +27,14 @@ public class LoginBo {
         }
         return lUser;
     }
+
+    public void setUserOtp(String pOtp, long pUserId) {
+        try {
+            gLoginDao.updateOtp(pOtp,pUserId);
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+
+        }
+    }
 }
