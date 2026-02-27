@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 
 @Component
@@ -33,15 +34,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
         try {
+            String lBaseURL = request.getRequestURL().toString();
+            System.out.println("lBaseURL: " + getEndpoint(lBaseURL));
+
             String lJWT = JwtUtility.getToken(request.getHeader("Authorization"));
 
-            String gTokenStatus = JwtUtility.validateToken(lJWT);
+
+            String gTokenStatus = JwtUtility.validateToken(lJWT,getEndpoint(lBaseURL));
             if (!gTokenStatus.equals("SUCCESS")) {
                 filterChain.doFilter(request, response);
             }
             Claims claims = JwtUtility.getClaimsFromToken(lJWT);
-//            Long lUserId = claims.get(JWTClaim.USERID, Long.class);
-//            Users User = gUserDao.getUser(lUserId);
+           Long lUserId = claims.get(JWTClaim.USERID, Long.class);
+           Users User = gUserDao.getUser(lUserId);
 
 
 
@@ -51,7 +56,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(
-                            username,
+                            User.getUserName(),
                             null,
                             List.of(new SimpleGrantedAuthority("USER"))
                     );
@@ -65,4 +70,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
     }
+
+
+    public static String getEndpoint(String url) {
+        URI uri = URI.create(url);
+        String URL=  uri.getPath();
+
+        String[] parts = URL.split("/");
+        return  parts[parts.length - 1]; // returns "/login"// returns "/authserver/login"
+    }
+
+
 }

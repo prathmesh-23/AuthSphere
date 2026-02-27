@@ -38,26 +38,19 @@ public class LoginService {
             lApiResponse.setResponse("success");
             String lOtp = OTP.generateOtp();
             gLoginBo.setUserOtp(lOtp,lUser.getUserid());
-            Users User = new Users();
-//            User.setOtp(lOtp);
-            User.setUserName(lUser.getUserName());
-            User.setIsactive(lUser.getIsactive());
-            User.setIsdeleted(lUser.getIsdeleted());
+//            Users User = new Users();
+////            User.setOtp(lOtp);
+//            User.setUserName(lUser.getUserName());
+//            User.setIsactive(lUser.getIsactive());
+//            User.setIsdeleted(lUser.getIsdeleted());
 
             LoginResponse  lResponse = new LoginResponse();
 
-            lResponse.setOtp(lOtp);
-            lResponse.setUser(User);
+            lResponse.setRole("ADMIN");
+            lResponse.setUserID(lUser.getUserid());
+            lResponse.setUserName(lUser.getUserName());
             lResponse.setOtpExpiration_Time("200Minute");
 
-//
-//            Map<String, Object> claims = new HashMap<>();
-//            claims.put("sub", "prathmesh");
-//            claims.put("role", lUser.getUserName());
-//            claims.put("userid", lUser.getUserid());
-//            claims.put("ip", "admin");
-
-//            String sessioniD =
             lApiResponse.setToken(JwtUtility.setClaims(lUser));
             lApiResponse.setStatusCode("200");
             lApiResponse.setResponse(lResponse);

@@ -38,6 +38,6 @@ public class Users {
     private String hash_key;
 
     @Column(name = "otp", nullable = false)
-    private String otp;
+    private String OTP;
 
 }

@@ -3,6 +3,7 @@ package io.securepath.authsphere.IOJwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import io.securepath.authsphere.constants.ConfigProperties;
 import io.securepath.authsphere.models.Users;
 
 import javax.crypto.SecretKey;
@@ -17,6 +18,7 @@ public class JwtUtility {
 
     // Create token from claims
     public static String createToken(Map<String, Object> claims) {
+       System.out.println(JWTConstant.SECRET);
         return Jwts.builder()
                 .setClaims(claims)
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -26,9 +28,11 @@ public class JwtUtility {
     }
 
     // Validate token and return claims
-    public static String validateToken(String token) {
+    public static String validateToken(String token,String URL) {
         try {
-
+            if (URL.equalsIgnoreCase("login") || URL.equalsIgnoreCase("forgotpassword")) {
+                return "SUCCESS";
+            }
             Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()

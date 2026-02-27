@@ -5,9 +5,10 @@ import io.securepath.authsphere.models.Users;
 import io.securepath.authsphere.request.UserRequest;
 import io.securepath.authsphere.response.ApiResponse;
 import org.aspectj.weaver.ast.Var;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-@Service
+@Component
 public class OtpValidation {
 
     public ApiResponse otpValidate(Users pUser, UserRequest pUserReq) throws Exception {
@@ -16,13 +17,14 @@ public class OtpValidation {
 
         //OTP from Request
         var lOtp = pUserReq.getOtp();
+        System.out.println(lOtp);
         if (lOtp == null || lOtp.isEmpty()) {
             lApiResponse.setStatusCode("001");
             return lApiResponse;
         }
 
         //Compare the OTP
-        if (!lOtp.equalsIgnoreCase(pUser.getOtp())) {
+        if (!lOtp.equalsIgnoreCase(pUser.getOTP())) {
             lApiResponse.setStatusCode("002");
             return lApiResponse;
         }

@@ -30,7 +30,9 @@ public class LoginBo {
 
     public void setUserOtp(String pOtp, long pUserId) {
         try {
-            gLoginDao.updateOtp(pOtp,pUserId);
+            System.out.println(pOtp + " " + pUserId);
+           int res = gLoginDao.updateOtp(pOtp,pUserId);
+           System.out.println(res);
 
         } catch (Exception e) {
             System.out.println(e.getMessage());

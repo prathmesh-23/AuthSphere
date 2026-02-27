@@ -1,6 +1,12 @@
 package io.securepath.authsphere.IOJwt;
 
+import io.securepath.authsphere.constants.ConfigProperties;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+
 public class JWTConstant {
-    public static final String SECRET = "q8jF9nZp7Vh2kLx9aTzQm4uYw5r8s1d2f3g6h7j8k9l0m1n2o3p4q5r6s7t8u9v0"; // 256-bit Base64 string
+
+    public static String SECRET = ConfigProperties.SECRETS.get("SECRET");
 
 }

@@ -40,4 +40,14 @@ public class Login {
         }
         return lResponse;
     }
+
+    @PostMapping("/forggotPassword")
+    public ApiResponse forgotPassword(@RequestBody UserRequest pForgot) {
+        return  new ApiResponse();
+    }
+
+    @PostMapping("/changePassword")
+    public ApiResponse changePassword(@RequestBody UserRequest pForgot) {
+        return  new ApiResponse();
+    }
 }
