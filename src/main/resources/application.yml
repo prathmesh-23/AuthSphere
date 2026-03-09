@@ -58,7 +58,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: indulkarprathmesh7@gmail.com
-    password: zqyj gwtj avvm vqsz   # from Gmail App Passwords
+    password: pass  # from Gmail App Passwords
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
