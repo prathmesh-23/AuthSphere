@@ -35,8 +35,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             String lBaseURL = request.getRequestURL().toString();
+            String URLEndpoint = getEndpoint(lBaseURL);
             System.out.println("lBaseURL: " + getEndpoint(lBaseURL));
-
+            Users User=null;
             String lJWT = JwtUtility.getToken(request.getHeader("Authorization"));
 
 
@@ -44,19 +45,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if (!gTokenStatus.equals("SUCCESS")) {
                 filterChain.doFilter(request, response);
             }
-            Claims claims = JwtUtility.getClaimsFromToken(lJWT);
-           Long lUserId = claims.get(JWTClaim.USERID, Long.class);
-           Users User = gUserDao.getUser(lUserId);
-
-
-
+            if (!URLEndpoint.equalsIgnoreCase("login") && !URLEndpoint.equalsIgnoreCase("forggotPassword") ) {
+                Claims claims = JwtUtility.getClaimsFromToken(lJWT);
+                Long lUserId = claims.get(JWTClaim.USERID, Long.class);
+                User = gUserDao.getUser(lUserId);
+            }
 
             String username = "Prathmesh";
             // String role = gJwtService.extractRole(token);
 
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(
-                            User.getUserName(),
+                            username,
                             null,
                             List.of(new SimpleGrantedAuthority("USER"))
                     );

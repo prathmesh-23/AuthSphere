@@ -30,7 +30,7 @@ public class JwtUtility {
     // Validate token and return claims
     public static String validateToken(String token,String URL) {
         try {
-            if (URL.equalsIgnoreCase("login") || URL.equalsIgnoreCase("forgotpassword")) {
+            if (URL.equalsIgnoreCase("login") || URL.equalsIgnoreCase("forggotPassword")) {
                 return "SUCCESS";
             }
             Jwts.parserBuilder()

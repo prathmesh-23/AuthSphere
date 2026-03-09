@@ -54,6 +54,15 @@ spring:
       port: 6379
       timeout: 60000
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: indulkarprathmesh7@gmail.com
+    password: zqyj gwtj avvm vqsz   # from Gmail App Passwords
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
 
 
 #public-key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzMuX4co3ovnhnV950HD1GOyAhXVfazDU720MzdZ4OZmWJFHuiJeKESDE+TuV/D54PtIxyxI4o6sGKq4Ul36tyAV6kK/UJCs4BVncpR6IxLKscUa0DOMsmSErrvgIccQ+J5Vrd7Vj72Uu5EEM1mnj3oLcIR1OMSnnnUto9iITuWRmhrhUlkn8vdSjiIHargagzz15jMP+3KSzHoitaEjuqRsPDJLc9557Fd+Se90s84v6RwYdcRTyGTFqy5pYhqGONs60JoPAPCCcSStEoaQ6lM/ib7c84trlcVDLNRz3iQzx9TqpLy5vkkfxZG38FHxyslz1ep7/nc4M9rRGn3UFCwIDAQAB

@@ -4,12 +4,17 @@ import io.securepath.authsphere.IOJwt.JwtUtility;
 import io.securepath.authsphere.Utilitys.OTP;
 import io.securepath.authsphere.bo.LoginBo;
 import io.securepath.authsphere.bo.UserBo;
+import io.securepath.authsphere.controller.Login;
+import io.securepath.authsphere.cryptography.AESEncryption;
+import io.securepath.authsphere.notifications.EmailSend;
 import io.securepath.authsphere.response.LoginResponse;
 import io.securepath.authsphere.validation.LoginVald;
 import io.securepath.authsphere.models.Users;
 import io.securepath.authsphere.request.UserRequest;
 import io.securepath.authsphere.response.ApiResponse;
 import io.securepath.authsphere.validation.OtpValidation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,10 +23,16 @@ import java.util.Map;
 
 @Service
 public class LoginService {
+
+    private static final Logger glogger = LoggerFactory.getLogger(LoginService.class);
+
     @Autowired
     private LoginBo gLoginBo;
     @Autowired
     private UserBo gUserBo;
+
+    @Autowired
+    private EmailSend gEmailSend;
 
     @Autowired
     private OtpValidation gOtpValidation;
@@ -64,5 +75,22 @@ public class LoginService {
     public ApiResponse otpValidate(UserRequest pOtpRequest) throws Exception {
         Users lUser = gUserBo.getUserBo(pOtpRequest);
         return gOtpValidation.otpValidate(lUser,pOtpRequest);
+    }
+
+    public ApiResponse forgotPassService(UserRequest pUserRequest) {
+        ApiResponse lApiResponse = new ApiResponse();
+        try {
+            if (!pUserRequest.getEmail().isEmpty()) {
+              Users lUser =  gLoginBo.getUser(pUserRequest);
+                //check the user active or not
+                gEmailSend.sendEmail(AESEncryption.decrypt(lUser.getEmailEnc()),"Rest Passqword","OPT :123456");
+                //send the otp or new password to the email
+            }else{
+
+            }
+        } catch (Exception e) {
+
+        }
+        return lApiResponse;
     }
 }
