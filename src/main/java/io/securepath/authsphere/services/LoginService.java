@@ -4,6 +4,8 @@ import io.securepath.authsphere.IOJwt.JwtUtility;
 import io.securepath.authsphere.Utilitys.OTP;
 import io.securepath.authsphere.bo.LoginBo;
 import io.securepath.authsphere.bo.UserBo;
+import io.securepath.authsphere.constants.EmailSubject;
+import io.securepath.authsphere.constants.ErrorConstant;
 import io.securepath.authsphere.controller.Login;
 import io.securepath.authsphere.cryptography.AESEncryption;
 import io.securepath.authsphere.notifications.EmailSend;
@@ -16,8 +18,12 @@ import io.securepath.authsphere.validation.OtpValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,6 +47,8 @@ public class LoginService {
     public ApiResponse loginProcess(UserRequest login) {
         ApiResponse lApiResponse = new ApiResponse();
         Users lUser = gLoginBo.getUser(login);
+        LocalDateTime lOtpExpirationTime = LocalDateTime.now().minusMinutes(10);
+
         // login.setPassword(AESEncryption.hashPasswordWithKey(login.getPassword(),lUser.getHash_key()));
         System.out.println(lUser);
         System.out.println(login);
@@ -48,14 +56,14 @@ public class LoginService {
         if (lPwsChk) {
             lApiResponse.setResponse("success");
             String lOtp = OTP.generateOtp();
-            gLoginBo.setUserOtp(lOtp,lUser.getUserid());
+            gLoginBo.setUserOtp(lOtp, lOtpExpirationTime,lUser.getUserid());
 //            Users User = new Users();
 ////            User.setOtp(lOtp);
 //            User.setUserName(lUser.getUserName());
 //            User.setIsactive(lUser.getIsactive());
 //            User.setIsdeleted(lUser.getIsdeleted());
 
-            LoginResponse  lResponse = new LoginResponse();
+            LoginResponse lResponse = new LoginResponse();
 
             lResponse.setRole("ADMIN");
             lResponse.setUserID(lUser.getUserid());
@@ -74,23 +82,53 @@ public class LoginService {
 
     public ApiResponse otpValidate(UserRequest pOtpRequest) throws Exception {
         Users lUser = gUserBo.getUserBo(pOtpRequest);
-        return gOtpValidation.otpValidate(lUser,pOtpRequest);
+        return gOtpValidation.otpValidate(lUser, pOtpRequest);
     }
 
     public ApiResponse forgotPassService(UserRequest pUserRequest) {
         ApiResponse lApiResponse = new ApiResponse();
+
+        //OTP ExpireTime
+        //OTP genrate Time
+        LocalDateTime lOtpExpirationTime = LocalDateTime.now().minusMinutes(10);
         try {
-            if (!pUserRequest.getEmail().isEmpty()) {
-              Users lUser =  gLoginBo.getUser(pUserRequest);
-                //check the user active or not
-                gEmailSend.sendEmail(AESEncryption.decrypt(lUser.getEmailEnc()),"Rest Passqword","OPT :123456");
-                //send the otp or new password to the email
-            }else{
-
+            Users lUser = gLoginBo.getUser(pUserRequest);
+            if (lUser == null) {
+                lApiResponse.setStatus(ErrorConstant.FALIURE);
+                lApiResponse.setResponse("USER NOT FOUND");
+                return lApiResponse;
             }
-        } catch (Exception e) {
+            if (lUser.getEmailEnc().isEmpty()) {
+                lApiResponse.setStatus(ErrorConstant.FALIURE);
+                lApiResponse.setResponse("USER NOT FOUND");
+                return lApiResponse;
+            }
 
+            //OTP Genrate and store into User detail with otpExprire time
+            String lOtp = OTP.generateOtp();
+            int otpInsert = gLoginBo.setUserOtp(lOtp,lOtpExpirationTime, lUser.getUserid());
+            if (otpInsert != 1) {
+                lApiResponse.setStatus(ErrorConstant.ERROR);
+                lApiResponse.setResponse("");
+                return lApiResponse;
+            }
+
+            //check the user active or not
+            gEmailSend.sendEmail(AESEncryption.decrypt(lUser.getEmailEnc()), EmailSubject.FORGGOT_PASSWORD, "OPT :123456");
+
+            lApiResponse.setStatus(ErrorConstant.SUCCESS);
+            lApiResponse.setResponse("OTP HAS BEEN SENT");
+            lApiResponse.setToken(JwtUtility.setClaims(lUser));
+        } catch (Exception e) {
+            glogger.error("Exception in forgotPassService " + e);
+            lApiResponse.setStatus(ErrorConstant.ERROR);
         }
         return lApiResponse;
+    }
+
+    public static void main(String[] args) {
+        LocalDateTime lOtpExpirationTime = LocalDateTime.now().plusMinutes(10);
+        System.out.println(lOtpExpirationTime
+        );
     }
 }

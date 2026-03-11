@@ -8,12 +8,14 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Repository
 public interface LoginRepo extends JpaRepository<Users, Long> {
 
 
     public static String GET_USER_BY_EMAIL = "SELECT * FROM users WHERE email_enc=:emailEnc";
-    public static String UPDATE_OTP = "UPDATE users SET otp = :otp WHERE userid = :userId";
+    public static String UPDATE_OTP = "UPDATE users SET otp = :otp, otpexptime = :otpExpTime WHERE userid = :userId";
 //    public static String CREATE_USER = "INSERT INTO Users(username, email_enc, pass_enc,hash_key, isactive, isdeleted) VALUES (:name, :emailEnc, :passEnc, :Hash_Key, :isActive, :isDeleted)";
 public static String UPDATE_USER = "UPDATE Users SET username=:name, email_enc=:emailEnc WHERE userid=:pUserId";
 
@@ -27,5 +29,5 @@ public static String UPDATE_USER = "UPDATE Users SET username=:name, email_enc=:
     @Transactional
     @Modifying
     @Query(value = UPDATE_OTP, nativeQuery = true)
-    int updateOtp(@Param("otp") String otp, @Param("userId") long userId);
+    int updateOtp(@Param("otp") String otp, @Param("otpExpTime") LocalDateTime otpExpTime, @Param("userId") long userId);
 }
