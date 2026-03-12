@@ -1,37 +1,47 @@
 package io.securepath.authsphere.validation;
 
 import io.securepath.authsphere.IOJwt.JwtUtility;
+import io.securepath.authsphere.constants.ErrorConstant;
+import io.securepath.authsphere.constants.RedisConstant;
 import io.securepath.authsphere.models.Users;
-import io.securepath.authsphere.request.UserRequest;
 import io.securepath.authsphere.response.ApiResponse;
-import org.aspectj.weaver.ast.Var;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 @Component
 public class OtpValidation {
 
-    public ApiResponse otpValidate(Users pUser, UserRequest pUserReq) throws Exception {
+    public ApiResponse otpValidate(Users pUser, String pReqOtp) throws Exception {
+        var lOtpExpInMinutes = RedisConstant.OTP_EXP_TIME;
+        LocalDateTime lCurrentTime = LocalDateTime.now();
+        LocalDateTime lOTPGenTime = pUser.getOtpexptime();
+
         ApiResponse lApiResponse = new ApiResponse();
-        String lOtpExpTime = "";
-
-        //OTP from Request
-        var lOtp = pUserReq.getOtp();
-        System.out.println(lOtp);
-        if (lOtp == null || lOtp.isEmpty()) {
-            lApiResponse.setStatusCode("001");
+        if (pUser.getOTP() == null || pReqOtp == null) {
+            lApiResponse.setStatus(ErrorConstant.FALIURE);
+            lApiResponse.setResponse("OTP NOT VALID");
             return lApiResponse;
         }
-
         //Compare the OTP
-        if (!lOtp.equalsIgnoreCase(pUser.getOTP())) {
-            lApiResponse.setStatusCode("002");
+        if (!pReqOtp.equalsIgnoreCase(pUser.getOTP())) {
+            lApiResponse.setStatus(ErrorConstant.FALIURE);
+            lApiResponse.setResponse("OTP IS INCORRECT");
             return lApiResponse;
         }
-        lApiResponse.setStatusCode("00");
-        lApiResponse.setResponse("Otp Validate Success");
+
+        long lOtp_duration_in_min = Duration.between(lCurrentTime, lOTPGenTime).toMinutes();
+        //checking time duration between otp genrate and request otp
+        if (!(lOtp_duration_in_min <= lOtpExpInMinutes)) {
+            lApiResponse.setStatus(ErrorConstant.FALIURE);
+            lApiResponse.setResponse("OTP HAS EXPIRED");
+            return lApiResponse;
+        }
+        lApiResponse.setStatus(ErrorConstant.SUCCESS);
+        lApiResponse.setResponse("OTP VALIDATE SUCCESS");
         lApiResponse.setToken(JwtUtility.refreshToken(pUser));
-        //Check Otp Expiration Time Here
         return lApiResponse;
+        //Check Otp Expiration Time Here
     }
 }

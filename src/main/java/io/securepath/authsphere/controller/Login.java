@@ -34,12 +34,10 @@ public class Login {
     @PostMapping("/otpvalidate")
     public ApiResponse otpValidate(@RequestBody UserRequest pOtp) {
         ApiResponse lResponse = new ApiResponse();
-
         try {
             lResponse = gLoginService.otpValidate(pOtp);
         } catch (Exception e) {
             glogger.error("Exception in OTP Validate", e);
-
         }
         return lResponse;
     }

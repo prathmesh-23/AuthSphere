@@ -6,6 +6,7 @@ import io.securepath.authsphere.bo.LoginBo;
 import io.securepath.authsphere.bo.UserBo;
 import io.securepath.authsphere.constants.EmailSubject;
 import io.securepath.authsphere.constants.ErrorConstant;
+import io.securepath.authsphere.constants.RedisConstant;
 import io.securepath.authsphere.controller.Login;
 import io.securepath.authsphere.cryptography.AESEncryption;
 import io.securepath.authsphere.notifications.EmailSend;
@@ -18,6 +19,7 @@ import io.securepath.authsphere.validation.OtpValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
@@ -80,30 +82,34 @@ public class LoginService {
     }
 
 
-    public ApiResponse otpValidate(UserRequest pOtpRequest) throws Exception {
-        Users lUser = gUserBo.getUserBo(pOtpRequest);
-        return gOtpValidation.otpValidate(lUser, pOtpRequest);
+    public ApiResponse otpValidate(UserRequest pOtpRequest) {
+        ApiResponse lApiResponse = new ApiResponse();
+        try {
+            Users lUser = gLoginBo.getUser(pOtpRequest);
+            if (lUser == null || lUser.getEmailEnc().isEmpty()) {
+                lApiResponse.setStatus(ErrorConstant.FALIURE);
+                lApiResponse.setResponse("USER NOT FOUND");
+                return lApiResponse;
+            }
+            lApiResponse =  gOtpValidation.otpValidate(lUser,pOtpRequest.getOtp() );
+        } catch (Exception e) {
+            glogger.error("Exception in forgotPassService " + e);
+            lApiResponse.setStatus(ErrorConstant.ERROR);
+        }
+
+        return lApiResponse;
     }
 
     public ApiResponse forgotPassService(UserRequest pUserRequest) {
         ApiResponse lApiResponse = new ApiResponse();
-
-        //OTP ExpireTime
-        //OTP genrate Time
         LocalDateTime lOtpExpirationTime = LocalDateTime.now().minusMinutes(10);
         try {
             Users lUser = gLoginBo.getUser(pUserRequest);
-            if (lUser == null) {
+            if (lUser == null || lUser.getEmailEnc().isEmpty()) {
                 lApiResponse.setStatus(ErrorConstant.FALIURE);
                 lApiResponse.setResponse("USER NOT FOUND");
                 return lApiResponse;
             }
-            if (lUser.getEmailEnc().isEmpty()) {
-                lApiResponse.setStatus(ErrorConstant.FALIURE);
-                lApiResponse.setResponse("USER NOT FOUND");
-                return lApiResponse;
-            }
-
             //OTP Genrate and store into User detail with otpExprire time
             String lOtp = OTP.generateOtp();
             int otpInsert = gLoginBo.setUserOtp(lOtp,lOtpExpirationTime, lUser.getUserid());
@@ -112,7 +118,6 @@ public class LoginService {
                 lApiResponse.setResponse("");
                 return lApiResponse;
             }
-
             //check the user active or not
             gEmailSend.sendEmail(AESEncryption.decrypt(lUser.getEmailEnc()), EmailSubject.FORGGOT_PASSWORD, "OPT :123456");
 
