@@ -111,18 +111,27 @@ public class LoginService {
                 return lApiResponse;
             }
             //OTP Genrate and store into User detail with otpExprire time
-            String lOtp = OTP.generateOtp();
-            int otpInsert = gLoginBo.setUserOtp(lOtp,lOtpExpirationTime, lUser.getUserid());
-            if (otpInsert != 1) {
-                lApiResponse.setStatus(ErrorConstant.ERROR);
-                lApiResponse.setResponse("");
-                return lApiResponse;
-            }
+//            String lOtp = OTP.generateOtp();
+//            int otpInsert = gLoginBo.setUserOtp(lOtp,lOtpExpirationTime, lUser.getUserid());
+//            if (otpInsert != 1) {
+//                lApiResponse.setStatus(ErrorConstant.ERROR);
+//                lApiResponse.setResponse("");
+//                return lApiResponse;
+//            }
+
+            HashMap<String,String> lEmailValue = new HashMap<>();
+            lEmailValue.put("username", lUser.getUserName());
+            lEmailValue.put("userEmail", AESEncryption.decrypt(lUser.getEmailEnc()));
+            lEmailValue.put("subject", EmailSubject.FORGGOT_PASSWORD);
+            lEmailValue.put("resetLink", "http://localhost:9000/passwordpolicy/rest/password?key=ABC");
+            lEmailValue.put("expiryHours", "2");
+
+
             //check the user active or not
-            gEmailSend.sendEmail(AESEncryption.decrypt(lUser.getEmailEnc()), EmailSubject.FORGGOT_PASSWORD, "OPT :123456");
+              gEmailSend.sendEmail(lEmailValue);
 
             lApiResponse.setStatus(ErrorConstant.SUCCESS);
-            lApiResponse.setResponse("OTP HAS BEEN SENT");
+            lApiResponse.setResponse("URL HAS SEND TO EMAIL");
             lApiResponse.setToken(JwtUtility.setClaims(lUser));
         } catch (Exception e) {
             glogger.error("Exception in forgotPassService " + e);

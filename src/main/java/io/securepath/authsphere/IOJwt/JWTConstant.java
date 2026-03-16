@@ -1,12 +1,10 @@
 package io.securepath.authsphere.IOJwt;
 
-import io.securepath.authsphere.constants.ConfigProperties;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import io.securepath.authsphere.constants.RedisFunctions;
 
 
 public class JWTConstant {
 
-    public static String SECRET = ConfigProperties.SECRETS.get("SECRET");
+    public static String SECRET = RedisFunctions.SECRETS.get("SECRET");
 
 }

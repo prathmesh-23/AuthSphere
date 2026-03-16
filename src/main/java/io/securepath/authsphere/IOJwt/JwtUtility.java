@@ -3,7 +3,6 @@ package io.securepath.authsphere.IOJwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import io.securepath.authsphere.constants.ConfigProperties;
 import io.securepath.authsphere.models.Users;
 
 import javax.crypto.SecretKey;
