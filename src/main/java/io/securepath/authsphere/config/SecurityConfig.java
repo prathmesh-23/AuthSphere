@@ -67,7 +67,8 @@ public class SecurityConfig {
                                                    JwtAuthFilter jwtAuthFilter) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/authserver/login").permitAll()
+                        .requestMatchers("/authserver/login",
+                                "/authserver/forgotpassword","/passwordpolicy/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf(AbstractHttpConfigurer::disable) // disable CSRF for APIs

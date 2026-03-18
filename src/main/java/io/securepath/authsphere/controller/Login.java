@@ -42,7 +42,7 @@ public class Login {
         return lResponse;
     }
 
-    @PostMapping("/forggotPassword")
+    @PostMapping("/forgotpassword")
     public ApiResponse forgotPassword(@RequestBody UserRequest pUserRequest) {
         ApiResponse lResponse = new ApiResponse();
         try {
@@ -50,7 +50,7 @@ public class Login {
         } catch (Exception e) {
             glogger.error("Exception in Forgot Password", e);
         }
-        return new ApiResponse();
+        return lResponse;
     }
 
     @PostMapping("/changePassword")

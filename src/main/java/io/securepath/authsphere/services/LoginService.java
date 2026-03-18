@@ -2,12 +2,12 @@ package io.securepath.authsphere.services;
 
 import io.securepath.authsphere.IOJwt.JwtUtility;
 import io.securepath.authsphere.Utilitys.OTP;
+import io.securepath.authsphere.Utilitys.PasswordPolices;
 import io.securepath.authsphere.bo.LoginBo;
 import io.securepath.authsphere.bo.UserBo;
 import io.securepath.authsphere.constants.EmailSubject;
 import io.securepath.authsphere.constants.ErrorConstant;
-import io.securepath.authsphere.constants.RedisConstant;
-import io.securepath.authsphere.controller.Login;
+import io.securepath.authsphere.constants.RedisFunctions;
 import io.securepath.authsphere.cryptography.AESEncryption;
 import io.securepath.authsphere.notifications.EmailSend;
 import io.securepath.authsphere.response.LoginResponse;
@@ -19,15 +19,10 @@ import io.securepath.authsphere.validation.OtpValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class LoginService {
@@ -45,6 +40,10 @@ public class LoginService {
     @Autowired
     private OtpValidation gOtpValidation;
 
+    @Autowired
+    private PasswordPolices gPasswordPolices;
+
+
 
     public ApiResponse loginProcess(UserRequest login) {
         ApiResponse lApiResponse = new ApiResponse();
@@ -58,7 +57,7 @@ public class LoginService {
         if (lPwsChk) {
             lApiResponse.setResponse("success");
             String lOtp = OTP.generateOtp();
-            gLoginBo.setUserOtp(lOtp, lOtpExpirationTime,lUser.getUserid());
+            gLoginBo.setUserOtp(lOtp, lOtpExpirationTime, lUser.getUserid());
 //            Users User = new Users();
 ////            User.setOtp(lOtp);
 //            User.setUserName(lUser.getUserName());
@@ -91,7 +90,7 @@ public class LoginService {
                 lApiResponse.setResponse("USER NOT FOUND");
                 return lApiResponse;
             }
-            lApiResponse =  gOtpValidation.otpValidate(lUser,pOtpRequest.getOtp() );
+            lApiResponse = gOtpValidation.otpValidate(lUser, pOtpRequest.getOtp());
         } catch (Exception e) {
             glogger.error("Exception in forgotPassService " + e);
             lApiResponse.setStatus(ErrorConstant.ERROR);
@@ -110,25 +109,22 @@ public class LoginService {
                 lApiResponse.setResponse("USER NOT FOUND");
                 return lApiResponse;
             }
-            //OTP Genrate and store into User detail with otpExprire time
-//            String lOtp = OTP.generateOtp();
-//            int otpInsert = gLoginBo.setUserOtp(lOtp,lOtpExpirationTime, lUser.getUserid());
-//            if (otpInsert != 1) {
-//                lApiResponse.setStatus(ErrorConstant.ERROR);
-//                lApiResponse.setResponse("");
-//                return lApiResponse;
-//            }
 
-            HashMap<String,String> lEmailValue = new HashMap<>();
+            HashMap<String, String> lEmailValue = new HashMap<>();
             lEmailValue.put("username", lUser.getUserName());
-            lEmailValue.put("userEmail", AESEncryption.decrypt(lUser.getEmailEnc()));
-            lEmailValue.put("subject", EmailSubject.FORGGOT_PASSWORD);
-            lEmailValue.put("resetLink", "http://localhost:9000/passwordpolicy/rest/password?key=ABC");
-            lEmailValue.put("expiryHours", "2");
-
-
+            lEmailValue.put("resetLink", gPasswordPolices.generateRestPassUrl(String.valueOf(lUser.getUserid()),lUser.getUserName()));
+            lEmailValue.put("expiryHours", "1");
             //check the user active or not
-              gEmailSend.sendEmail(lEmailValue);
+
+            Runnable lRunnable = () -> {
+                try {
+                    gEmailSend.sendEmail(lEmailValue, EmailSubject.FORGGOT_PASSWORD, AESEncryption.decrypt(lUser.getEmailEnc()));
+                } catch (Exception e) {
+                    glogger.error("Email sending failed", e);
+                }
+            };
+            new Thread(lRunnable).start();
+
 
             lApiResponse.setStatus(ErrorConstant.SUCCESS);
             lApiResponse.setResponse("URL HAS SEND TO EMAIL");

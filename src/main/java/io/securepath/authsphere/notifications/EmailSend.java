@@ -1,5 +1,7 @@
 package io.securepath.authsphere.notifications;
 
+import io.securepath.authsphere.constants.ErrorConstant;
+import io.securepath.authsphere.response.ApiResponse;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,23 +27,30 @@ public class EmailSend {
         this.mailSender = mailSender;
     }
 
-    @Async
-    public void sendEmail(Map<String, String> pEmailDetails) throws MessagingException {
-        Context context = new Context();
-        context.setVariable("username", pEmailDetails.get("username"));
-        context.setVariable("resetLink", pEmailDetails.get("resetLink"));
-        context.setVariable("expiryHours", pEmailDetails.get("expiryHours"));
-        String pBody = templateEngine.process("forgot_pass", context);
 
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+    public void sendEmail(Map<String, String> pEmailDetails, String EmailSubject, String ToEmail) {
+        try {
+            Context context = new Context();
+            context.setVariable("username", pEmailDetails.get("username"));
+            context.setVariable("resetLink", pEmailDetails.get("resetLink"));
+            context.setVariable("expiryHours", pEmailDetails.get("expiryHours"));
+            String pBody = templateEngine.process("forgot_pass", context);
 
-        helper.setTo(pEmailDetails.get("userEmail"));
-        helper.setSubject(pEmailDetails.get("subject"));
-        helper.setText(pBody, true); // true = HTML
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-        mailSender.send(message);
+            helper.setTo(ToEmail);
+            helper.setSubject(EmailSubject);
+            helper.setText(pBody, true); // true = HTML
+
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.out.println(e);
+
+        }
     }
+
+
 }
 
 

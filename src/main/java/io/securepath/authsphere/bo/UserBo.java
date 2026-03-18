@@ -61,4 +61,8 @@ public class UserBo {
 
         return lResp;
     }
+
+    public int setUserNewPassword(String pHashPass,long lUserId) {
+        return gUserDao.setPassword(pHashPass, lUserId);
+    }
 }
