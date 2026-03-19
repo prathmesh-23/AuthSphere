@@ -24,7 +24,12 @@ public class AESEncryption {
 
     public static String encrypt(String plainText) {
         try {
-            byte[] iv = generateIV();
+            // Derive IV deterministically from the plaintext (SHA-256 hash)
+            java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(plainText.getBytes());
+            byte[] iv = new byte[IV_LENGTH];
+            System.arraycopy(hash, 0, iv, 0, IV_LENGTH);
+
             SecretKeySpec key = new SecretKeySpec(AES_KEY.getBytes(), AES);
 
             Cipher cipher = Cipher.getInstance(AES_GCM);
@@ -33,7 +38,7 @@ public class AESEncryption {
 
             byte[] cipherText = cipher.doFinal(plainText.getBytes());
 
-            // Store IV + ciphertext together (IV is needed for decryption)
+            // Store IV + ciphertext together
             byte[] combined = new byte[iv.length + cipherText.length];
             System.arraycopy(iv, 0, combined, 0, iv.length);
             System.arraycopy(cipherText, 0, combined, iv.length, cipherText.length);
@@ -45,23 +50,30 @@ public class AESEncryption {
         return "";
     }
 
-    public static String decrypt(String encryptedText) throws Exception {
-        byte[] decoded = Base64.getDecoder().decode(encryptedText);
+    public static String decrypt(String encryptedText) {
+        try {
+            byte[] decoded = Base64.getDecoder().decode(encryptedText);
 
-        // Extract IV and ciphertext
-        byte[] iv = new byte[IV_LENGTH];
-        byte[] cipherText = new byte[decoded.length - IV_LENGTH];
-        System.arraycopy(decoded, 0, iv, 0, IV_LENGTH);
-        System.arraycopy(decoded, IV_LENGTH, cipherText, 0, cipherText.length);
+            // In deterministic mode, IV is derived from the plaintext hash.
+            // But since we don’t know the plaintext yet, we must keep the IV derivation consistent.
+            // So: we still store IV + ciphertext together, then extract IV here.
+            byte[] iv = new byte[IV_LENGTH];
+            byte[] cipherText = new byte[decoded.length - IV_LENGTH];
+            System.arraycopy(decoded, 0, iv, 0, IV_LENGTH);
+            System.arraycopy(decoded, IV_LENGTH, cipherText, 0, cipherText.length);
 
-        SecretKeySpec key = new SecretKeySpec(AES_KEY.getBytes(), AES);
+            SecretKeySpec key = new SecretKeySpec(AES_KEY.getBytes(), AES);
 
-        Cipher cipher = Cipher.getInstance(AES_GCM);
-        GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
-        cipher.init(Cipher.DECRYPT_MODE, key, spec);
+            Cipher cipher = Cipher.getInstance(AES_GCM);
+            GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
+            cipher.init(Cipher.DECRYPT_MODE, key, spec);
 
-        byte[] plainText = cipher.doFinal(cipherText);
-        return new String(plainText);
+            byte[] plainText = cipher.doFinal(cipherText);
+            return new String(plainText);
+        } catch (Exception e) {
+            System.out.println(e);
+            return "";
+        }
     }
 
     private static byte[] generateIV() {
@@ -103,4 +115,10 @@ public class AESEncryption {
         return argon2.verify(storedHash, combined);
     }
 
+    public static void main(String[] args) {
+       String email= AESEncryption.encrypt("indulkarprathmesh7@gmail.com");
+
+       boolean res = AESEncryption.verifyPasswordWithKey("$argon2id$v=19$m=65536,t=3,p=1$AiQf3B+8WkyHMSG6ZEuFCg$M74ob3VD+KEfwMV7LMc0i8VibO8bysX0wbut8MUR1mk","Prathmesh@23","Reyv2CykC5rUMFfdTilOOLMDl7bayO0GuTXm2dFWYJk=");
+       System.out.println(res);
+    }
 }

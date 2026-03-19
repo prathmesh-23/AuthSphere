@@ -1,0 +1,85 @@
+package io.securepath.authsphere.IOJwt;
+
+
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import io.securepath.authsphere.models.Users;
+
+import javax.crypto.SecretKey;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+public class JwtUtility {
+
+    private static final SecretKey key = Keys.hmacShaKeyFor(Base64.getDecoder().decode(JWTConstant.SECRET));
+
+    // Create token from claims
+    public static String createToken(Map<String, Object> claims) {
+       System.out.println(JWTConstant.SECRET);
+        return Jwts.builder()
+                .setClaims(claims)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 15 * 60 * 1000))
+                .compact();
+    }
+
+    // Validate token and return claims
+    public static String validateToken(String token,String URL) {
+        try {
+            if (URL.equalsIgnoreCase("login") || URL.equalsIgnoreCase("forggotPassword")) {
+                return "SUCCESS";
+            }
+            Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token); // parses + validates signature + expiration
+
+        } catch (ExpiredJwtException e) {
+            System.err.println("❌ Token expired: " + e.getMessage());
+            return "Token expired";
+        } catch (UnsupportedJwtException e) {
+            System.err.println("❌ Unsupported JWT: " + e.getMessage());
+        } catch (MalformedJwtException e) {
+            System.err.println("❌ Malformed JWT: " + e.getMessage());
+        } catch (SignatureException e) {
+            System.err.println("❌ Invalid signature: " + e.getMessage());
+        } catch (RuntimeException e) {
+            System.err.println("❌ Empty or null token: " + e.getMessage());
+            return "INVALID SESSION";
+        }
+        return "SUCCESS";
+    }
+
+    public static String getToken(String pAuth) {
+        return pAuth.substring(7);
+    }
+
+    public static Claims getClaimsFromToken(String pToken) {
+        Jws<Claims> jws = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(pToken);
+
+        return jws.getBody();
+    }
+
+    public static String setClaims(Users pUser) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(JWTClaim.USERID, pUser.getUserid());
+        claims.put(JWTClaim.SUBJECT, pUser.getUserName());
+        claims.put(JWTClaim.IP, "0.127.0.0.1");
+        claims.put(JWTClaim.ISSUER_SERVER, "AuthSphere");
+        claims.put(JWTClaim.ROLE, "Roles");
+        claims.put(JWTClaim.SESSION, "admin");
+        claims.put(JWTClaim.EXP_TIME, "admin");
+
+
+        return createToken(claims);
+    }
+    public static String refreshToken(Users pUser) {
+        return setClaims(pUser);
+    }
+}

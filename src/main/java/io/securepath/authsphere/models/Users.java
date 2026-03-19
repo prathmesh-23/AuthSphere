@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 
 @Table(name="Users")
 @Entity
@@ -36,5 +37,11 @@ public class Users {
 
     @Column(name = "hash_key", nullable = false)
     private String hash_key;
+
+    @Column(name = "otp", nullable = false)
+    private String OTP;
+
+    @Column(name = "otpexptime", nullable = false)
+    private LocalDateTime otpexptime;
 
 }

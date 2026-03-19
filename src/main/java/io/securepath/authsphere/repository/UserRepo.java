@@ -17,6 +17,7 @@ public interface UserRepo extends JpaRepository<Users, Long> {
     public static String GET_USER_BY_ID = "SELECT * FROM Users WHERE userid=:pUserId";
     public static String CREATE_USER = "INSERT INTO Users(username, email_enc, pass_enc,hash_key, isactive, isdeleted) VALUES (:name, :emailEnc, :passEnc, :Hash_Key, :isActive, :isDeleted)";
     public static String UPDATE_USER = "UPDATE Users SET username=:name, email_enc=:emailEnc WHERE userid=:pUserId";
+    public static String CHANGE_PASSWORD = "UPDATE Users SET pass_enc=:passEnc WHERE userid=:pUserId";
 
     @Query(value = GET_USERS, nativeQuery = true)
     public List<Users> getUsers() throws Exception;
@@ -41,4 +42,9 @@ public interface UserRepo extends JpaRepository<Users, Long> {
     int updateUserDao(@Param("name") String pName,
                        @Param("emailEnc") String pEmailEnc,
                        @Param("pUserId") long pUserId) throws Exception;
+
+
+    @Modifying
+    @Query(value = CHANGE_PASSWORD, nativeQuery = true)
+    int setPassword(@Param("passEnc") String pEmailEnc, @Param("pUserId") long pUserId);
 }

@@ -7,10 +7,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class UserRequest {
+public class ChangePassRequest {
     private long userId;
-    private String email;
-    private String userName;
-    private String password;
-    private String Otp;
+    private String newpassword="";
 }
