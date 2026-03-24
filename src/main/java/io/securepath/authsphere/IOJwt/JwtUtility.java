@@ -4,12 +4,15 @@ package io.securepath.authsphere.IOJwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.securepath.authsphere.models.Users;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
 
 public class JwtUtility {
 
@@ -27,9 +30,9 @@ public class JwtUtility {
     }
 
     // Validate token and return claims
-    public static String validateToken(String token,String URL) {
+    public static   String validateToken(String token,String URL) {
         try {
-            if (URL.equalsIgnoreCase("login") || URL.equalsIgnoreCase("forggotPassword")) {
+            if (URL.equalsIgnoreCase("login") || URL.equalsIgnoreCase("forggotpassword")) {
                 return "SUCCESS";
             }
             Jwts.parserBuilder()

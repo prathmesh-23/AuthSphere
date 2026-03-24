@@ -25,26 +25,35 @@ public class RedisFunctions {
 
     @PostConstruct
     public void init() {
-        // Use SCAN instead of KEYS
-        ScanOptions options = ScanOptions.scanOptions().match("secret:*").count(100).build();
-        assert redisTemplate.getConnectionFactory() != null;
-        Cursor<byte[]> cursor = redisTemplate.getConnectionFactory()
-                .getConnection()
-                .scan(options);
+        Set<String> keys = redisTemplate.keys("*");
+        for (String key : keys) {
+            String type = redisTemplate.type(key).code(); // returns "string", "hash", etc.
 
-        while (cursor.hasNext()) {
-            String key = new String(cursor.next());
-            String value = redisTemplate.opsForValue().get(key);
-            SECRETS.put(key, value);
+            if ("string".equals(type)) {
+                String value = redisTemplate.opsForValue().get(key);
+                SECRETS.put(key, value);
+            } else if ("hash".equals(type)) {
+                Map<Object, Object> map = redisTemplate.opsForHash().entries(key);
+                // You can decide how to flatten or store this in SECRETS
+                map.forEach((k, v) -> SECRETS.put(key + ":" + k, v.toString()));
+            }
+            // optionally handle list/set/zset if you use them
         }
     }
 
     public void storeResetPassToken(String pKey_UserId, String pToken) {
         Map<String, String> lUserData = new HashMap<>();
-        lUserData.put("enc-token",pToken);
+        lUserData.put("reset_pass_token", pToken);
         lUserData.put("createdAt", Instant.now().toString());
-        redisTemplate.opsForHash().putAll(pKey_UserId, lUserData);
-        redisTemplate.expire(pKey_UserId, 1, TimeUnit.HOURS); // auto-expire after 1 hour
+
+        // Store under a namespaced key
+        String redisKey = "userid:" + pKey_UserId;
+
+        // Save hash
+        redisTemplate.opsForHash().putAll(redisKey, lUserData);
+
+        // Apply expiry to the same key
+        redisTemplate.expire(redisKey, 1, TimeUnit.HOURS);
     }
 
     public Map<Object, Object> findRestTokenByUserId(String pUserId) {

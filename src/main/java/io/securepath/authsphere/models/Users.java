@@ -44,4 +44,7 @@ public class Users {
     @Column(name = "otpexptime", nullable = false)
     private LocalDateTime otpexptime;
 
+    @Column(name = "role_id", nullable = false, length = 100)
+    private Long roleid;
+
 }

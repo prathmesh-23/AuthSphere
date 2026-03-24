@@ -1,5 +1,6 @@
 package io.securepath.authsphere.services;
 
+import io.securepath.authsphere.IOJwt.JwtUtility;
 import io.securepath.authsphere.Utilitys.PasswordPolices;
 import io.securepath.authsphere.bo.UserBo;
 import io.securepath.authsphere.constants.ErrorConstant;
@@ -55,12 +56,15 @@ public class PasswordService {
                 lAPIResponse.setResponse("LINK HAS EXPIRED");
                 return lAPIResponse;
             }
+            Users lUser = gUserDao.getUser(Long.parseLong(lUserId));
             String lToken = lTokenData.get("reset_pass_token").toString();
             if (!pReqToken.equals(lToken) ) {
                 lAPIResponse.setStatus(ErrorConstant.ERROR);
                 lAPIResponse.setResponse("INVALID TOKEN");
+                return lAPIResponse;
             }
             lAPIResponse.setStatus(ErrorConstant.SUCCESS);
+            lAPIResponse.setToken(JwtUtility.setClaims(lUser));
         } catch (Exception e) {
             glogger.error("Validate Forgot Password url: ", e);
         }
