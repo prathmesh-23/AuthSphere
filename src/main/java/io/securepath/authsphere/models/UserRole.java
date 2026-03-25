@@ -17,5 +17,5 @@ public class UserRole {
     private String userName;
 
     @Column(name = "role_name", nullable = false, unique = true, length = 100)
-    private String role_name="";
+    private String rolename="";
 }

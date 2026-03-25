@@ -9,10 +9,9 @@ import lombok.ToString;
 @Setter
 @ToString
 public class LoginResponse {
-    private long userID;
+    private long userId;
     private String userName;
-    private String Role;
-    private String otpExpiration_Time;
+    private long roleId;
 
     //Need to send permission list here and role as well
 

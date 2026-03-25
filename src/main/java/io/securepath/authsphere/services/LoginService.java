@@ -49,30 +49,32 @@ public class LoginService {
         ApiResponse lApiResponse = new ApiResponse();
         Users lUser = gLoginBo.getUser(login);
         LocalDateTime lOtpExpirationTime = LocalDateTime.now().minusMinutes(10);
-
-        // login.setPassword(AESEncryption.hashPasswordWithKey(login.getPassword(),lUser.getHash_key()));
-        System.out.println(lUser);
-        System.out.println(login);
         boolean lPwsChk = LoginVald.passWordAuthenticate(lUser.getPassEnc(), login.getPassword(), lUser.getHash_key());
         if (lPwsChk) {
-            lApiResponse.setResponse("success");
+            lApiResponse.setResponse(ErrorConstant.SUCCESS);
             String lOtp = OTP.generateOtp();
-            gLoginBo.setUserOtp(lOtp, lOtpExpirationTime, lUser.getUserid());
-//            Users User = new Users();
-////            User.setOtp(lOtp);
-//            User.setUserName(lUser.getUserName());
-//            User.setIsactive(lUser.getIsactive());
-//            User.setIsdeleted(lUser.getIsdeleted());
+            HashMap<String, String> lEmailValue = new HashMap<>();
+            lEmailValue.put("username", lUser.getUserName());
+            lEmailValue.put("otp", lOtp);
+            lEmailValue.put("expiryMinutes", "10");
+            Runnable lRunnable = () -> {
+                try {
+                    gEmailSend.sendOtpEmail(lEmailValue, EmailSubject.OTP_VERIFICATION, AESEncryption.decrypt(lUser.getEmailEnc()));
+                } catch (Exception e) {
+                    glogger.error("Email sending failed", e);
+                }
+            };
+            new Thread(lRunnable).start();
 
+            gLoginBo.setUserOtp(lOtp, lOtpExpirationTime, lUser.getUserid());
             LoginResponse lResponse = new LoginResponse();
 
-            lResponse.setRole("ADMIN");
-            lResponse.setUserID(lUser.getUserid());
+            lResponse.setRoleId(lUser.getRoleid());
+            lResponse.setUserId(lUser.getUserid());
             lResponse.setUserName(lUser.getUserName());
-            lResponse.setOtpExpiration_Time("200Minute");
 
             lApiResponse.setToken(JwtUtility.setClaims(lUser));
-            lApiResponse.setStatusCode("200");
+            lApiResponse.setStatusCode(ErrorConstant.SUCCESS);
             lApiResponse.setResponse(lResponse);
             return lApiResponse;
         }
