@@ -43,8 +43,6 @@ public class LoginService {
     @Autowired
     private PasswordPolices gPasswordPolices;
 
-
-
     public ApiResponse loginProcess(UserRequest login) {
         ApiResponse lApiResponse = new ApiResponse();
         Users lUser = gLoginBo.getUser(login);
@@ -78,7 +76,8 @@ public class LoginService {
             lApiResponse.setResponse(lResponse);
             return lApiResponse;
         }
-        lApiResponse.setResponse("password Wrong");
+        lApiResponse.setResponse("WRONG PASSWORD");
+        lApiResponse.setStatus(ErrorConstant.FALIURE);
         return lApiResponse;
     }
 

@@ -29,9 +29,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private UserRepo gUserDao;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
             String lBaseURL = request.getRequestURL().toString();
@@ -59,19 +57,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 UserRole lUser = gUserDao.getUserRole(lUserId);
 
                 System.out.println(lUser.toString());
-                if (lUser != null) {
-                    UsernamePasswordAuthenticationToken auth =
-                            new UsernamePasswordAuthenticationToken(
-                                    lUser.getUserName(),
-                                    null,
-                                    List.of(new SimpleGrantedAuthority(lUser.getRole_name())
-                            ));
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-                }
+
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(
+                                lUser.getUserName(),
+                                null,
+                                List.of(new SimpleGrantedAuthority(lUser.getRolename())
+                                ));
+                SecurityContextHolder.getContext().setAuthentication(auth);
+
             }
 
             filterChain.doFilter(request, response);
         } catch (Exception e) {
+            System.out.println(e);
             filterChain.doFilter(request, response);
         }
     }
