@@ -50,6 +50,28 @@ public class EmailSend {
         }
     }
 
+    public void sendOtpEmail(Map<String, String> pEmailDetails, String EmailSubject, String ToEmail) {
+        try {
+            Context context = new Context();
+            context.setVariable("username", pEmailDetails.get("username"));
+            context.setVariable("otp", pEmailDetails.get("otp"));
+            context.setVariable("expiryMinutes", pEmailDetails.get("expiryMinutes"));
+            String pBody = templateEngine.process("otp_send", context);
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            helper.setTo(ToEmail);
+            helper.setSubject(EmailSubject);
+            helper.setText(pBody, true); // true = HTML
+
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.out.println(e);
+
+        }
+    }
+
 
 }
 

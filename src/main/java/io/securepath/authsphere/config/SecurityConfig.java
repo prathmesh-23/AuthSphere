@@ -56,19 +56,17 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Configuration
-@EnableWebSecurity //provide the custmazation
+@EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
-//@EnableGlobalMethodSecurity(prePostEnabled = true) // Spring Security 5
 public class SecurityConfig {
 
-    private static final String SECRET = "q8jF9nZp7Vh2kLx9aTzQm4uYw5r8s1d2f3g6h7j8k9l0m1n2o3p4q5r6s7t8u9v0"; // 256-bit Base64 string
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    JwtAuthFilter jwtAuthFilter) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/authserver/login",
-                                "/authserver/forgotpassword","/passwordpolicy/**").permitAll()
+                                "/authserver/forgotpassword").permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf(AbstractHttpConfigurer::disable) // disable CSRF for APIs
