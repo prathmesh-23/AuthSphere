@@ -47,8 +47,22 @@ public class LoginService {
         ApiResponse lApiResponse = new ApiResponse();
         Users lUser = gLoginBo.getUser(login);
         LocalDateTime lOtpExpirationTime = LocalDateTime.now().minusMinutes(10);
+
+        if (lUser.getIsactive()!=1) {
+            lApiResponse.setStatus(ErrorConstant.FALIURE);
+            lApiResponse.setResponse("USER NOT ACTIVE");
+            return lApiResponse;
+        }
+        //wrong password enter incrase count by 1 and if succcess set 0
+        if (!(lUser.getPass_attempt() <=3)){
+            lApiResponse.setStatus(ErrorConstant.FALIURE);
+            lApiResponse.setResponse("USER IS BLOCKED");
+            return lApiResponse;
+        }
+
         boolean lPwsChk = LoginVald.passWordAuthenticate(lUser.getPassEnc(), login.getPassword(), lUser.getHash_key());
         if (lPwsChk) {
+            gLoginBo.resteLoginUpdate(login.getUserId());
             lApiResponse.setResponse(ErrorConstant.SUCCESS);
             String lOtp = OTP.generateOtp();
             HashMap<String, String> lEmailValue = new HashMap<>();
@@ -76,6 +90,7 @@ public class LoginService {
             lApiResponse.setResponse(lResponse);
             return lApiResponse;
         }
+        int result =gLoginBo.updatePasswordAttempt(login.getUserId());
         lApiResponse.setResponse("WRONG PASSWORD");
         lApiResponse.setStatus(ErrorConstant.FALIURE);
         return lApiResponse;

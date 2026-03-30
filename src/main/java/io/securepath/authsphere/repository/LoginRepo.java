@@ -16,8 +16,9 @@ public interface LoginRepo extends JpaRepository<Users, Long> {
 
     public static String GET_USER_BY_EMAIL = "SELECT * FROM users WHERE email_enc=:emailEnc";
     public static String UPDATE_OTP = "UPDATE users SET otp = :otp, otpexptime = :otpExpTime WHERE userid = :userId";
-//    public static String CREATE_USER = "INSERT INTO Users(username, email_enc, pass_enc,hash_key, isactive, isdeleted) VALUES (:name, :emailEnc, :passEnc, :Hash_Key, :isActive, :isDeleted)";
+   public static String UPDATE_PASSWORD_ATTEMPTS = "UPDATE users set passattempt= passattempt+1 WHERE userid = :pUserId";
 public static String UPDATE_USER = "UPDATE Users SET username=:name, email_enc=:emailEnc WHERE userid=:pUserId";
+    public static String RESET_PASSWORD_ATTEMPTS = "UPDATE users set passattempt=0 WHERE userid = :pUserId";
 
     @Query(value = GET_USER_BY_EMAIL, nativeQuery = true)
     public Users getUserByEmail(@Param("emailEnc") String pUserEmail) throws Exception;
@@ -30,4 +31,14 @@ public static String UPDATE_USER = "UPDATE Users SET username=:name, email_enc=:
     @Modifying
     @Query(value = UPDATE_OTP, nativeQuery = true)
     int updateOtp(@Param("otp") String otp, @Param("otpExpTime") LocalDateTime otpExpTime, @Param("userId") long userId);
+
+    @Transactional
+    @Modifying
+    @Query(value = UPDATE_PASSWORD_ATTEMPTS, nativeQuery = true)
+    int updatePasswordAttempt(@Param("pUserId") long pUserId);
+
+    @Transactional
+    @Modifying
+    @Query(value = RESET_PASSWORD_ATTEMPTS, nativeQuery = true)
+    void restPasswordAttempt(long pUserId);
 }

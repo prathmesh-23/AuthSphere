@@ -6,6 +6,7 @@ import io.securepath.authsphere.response.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +33,7 @@ public class Login {
     }
 
     @PostMapping("/otpvalidate")
+    @PreAuthorize("hasRole('USER')")
     public ApiResponse otpValidate(@RequestBody UserRequest pOtp) {
         ApiResponse lResponse = new ApiResponse();
         try {
@@ -43,6 +45,7 @@ public class Login {
     }
 
     @PostMapping("/forgotpassword")
+    @PreAuthorize("hasRole('USER')")
     public ApiResponse forgotPassword(@RequestBody UserRequest pUserRequest) {
         ApiResponse lResponse = new ApiResponse();
         try {
@@ -54,6 +57,7 @@ public class Login {
     }
 
     @PostMapping("/changePassword")
+    @PreAuthorize("hasRole('USER')")
     public ApiResponse changePassword(@RequestBody UserRequest pForgot) {
         ApiResponse lResponse = new ApiResponse();
         try {

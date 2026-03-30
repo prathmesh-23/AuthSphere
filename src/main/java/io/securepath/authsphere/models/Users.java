@@ -47,4 +47,7 @@ public class Users {
     @Column(name = "role_id", nullable = false, length = 100)
     private Long roleid;
 
+    @Column(name = "passattempt", nullable = false, length = 10)
+    private int pass_attempt;
+
 }

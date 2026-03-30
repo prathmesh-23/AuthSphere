@@ -46,4 +46,12 @@ public class LoginBo {
         }
         return res;
     }
+
+    public int updatePasswordAttempt(long pUserId) {
+        return gLoginDao.updatePasswordAttempt(pUserId);
+    }
+
+    public void resteLoginUpdate(long pUserId) {
+         gLoginDao.restPasswordAttempt(pUserId);
+    }
 }

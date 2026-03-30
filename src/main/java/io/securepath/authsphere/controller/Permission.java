@@ -2,10 +2,12 @@ package io.securepath.authsphere.controller;
 
 import io.securepath.authsphere.response.ApiResponse;
 import lombok.Getter;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/permission")
+@PreAuthorize("hasRole('ADMIN')")
 public class Permission {
 
     @GetMapping("/getlist")
